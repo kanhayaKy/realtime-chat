@@ -1,18 +1,22 @@
 from socket import socket, AF_INET, SOCK_STREAM
 
-HOST = "localhost"
-PORT = 7007
+from constants import HOST, PORT
 
 
 def handle_connection(connection, address):
-    with connection:
-        try:
-            print(f"Recvd connection from {address}")
+    try:
+        print(f"Recvd connection from {address}")
+        while True:
             request_data = connection.recv(1024).decode("utf-8")
-            http_response = f"HTTP/1.1 200 OK\r\nContent-Length: {len(request_data)}\r\n\r\n{request_data}"
-            connection.send(http_response.encode())
-        except Exception as err:
-            print(f"Error occured handling connection {connection} {address}")
+            if not request_data:
+                break
+
+            print(f"Data from {address}: {request_data}")
+            connection.send(request_data.encode())
+    except Exception as err:
+        print(f"Error occured handling connection {address} {err}")
+    finally:
+        connection.close()
 
 
 with socket(AF_INET, SOCK_STREAM) as server_socket:
